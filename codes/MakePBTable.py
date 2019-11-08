@@ -23,6 +23,7 @@
 ### import modules
 import timeit
 import csv
+import numpy
 import copy
 
 ### a function starting this script
@@ -74,6 +75,11 @@ def get_batters_only(player_list):
 
 ### a function to return AtBat table of given pitchers vs given batters
 def make_AB_table(PITCHERS, BATTERS, start_year, end_year):
+    unique_pitcher_list = list(sorted(set([x[0] for x in PITCHERS])))
+    unique_batter_list = list(sorted(set([x[0] for x in BATTERS])))
+
+    AB_table = [[-1]*(len(unique_batter_list)) for i in range(len(unique_pitcher_list))]
     
+
 
 
