@@ -32,6 +32,7 @@ def start():
 
     start_time = timeit.default_timer()
     ALL_PLAYERS = load_all_players("E:/HJ_Personal/Python/MLB_Analysis/data/regular/", 1990, 2018)
+    ALL_PLAYERS = load_all_players("F:/Documents/PycharmProjects/MLB_Analysis/data/regular/", 1990, 2018)
     PITCHERS = get_pitchers_only(ALL_PLAYERS)
     BATTERS = get_batters_only(ALL_PLAYERS)
     print("Execution Time: ", timeit.default_timer() - start_time)
@@ -74,12 +75,23 @@ def get_batters_only(player_list):
 
 
 ### a function to return AtBat table of given pitchers vs given batters
-def make_AB_table(PITCHERS, BATTERS, start_year, end_year):
+def make_AB_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
+    ### get unique pitcher and batter lists
     unique_pitcher_list = list(sorted(set([x[0] for x in PITCHERS])))
     unique_batter_list = list(sorted(set([x[0] for x in BATTERS])))
 
-    AB_table = [[-1]*(len(unique_batter_list)) for i in range(len(unique_pitcher_list))]
-    
+    ### create an empty AB_table
+    AB_table = {y : {x : -1 for x in unique_batter_list} for y in unique_pitcher_list}
+
+    ###
+    for year in range(start_year, end_year+1):
+        with open(dataPath+"TEAM"+str(year), 'r') as f1:
+            teams = list(csv.reader(f1))
+        for team in teams:
+            with open(dataPath+str(year)+team[0]+".EV"+team[1], 'r') as f2:
+                events = list(csv.reader(f2))
+
+
 
 
 
