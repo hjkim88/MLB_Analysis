@@ -7,12 +7,13 @@
 #                The rows are pitchers and the columns are hitters
 #                With given year, only collect data since that year
 #
-#                There should be 5 tables:
-#                1. AB
-#                2. H
-#                3. BB
-#                4. AVG
-#                5. OBP
+#                There should be 6 tables:
+#                1. AB: At-Bat
+#                2. H: Hit
+#                3. HR: Home Run
+#                3. BB: Walk
+#                4. AVG: Batting Average
+#                5. OBP: On Base Percentage
 #
 #   Instruction
 #               1. import MakePBTable.py
@@ -74,16 +75,19 @@ def get_batters_only(player_list):
     return sorted(batter_list)
 
 
-### a function to return AtBat table of given pitchers vs given batters
-def make_AB_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
+### a function to return 3-dimensional statistical table of given pitchers vs given batters
+def make_stat_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
     ### get unique pitcher and batter lists
     unique_pitcher_list = list(sorted(set([x[0] for x in PITCHERS])))
     unique_batter_list = list(sorted(set([x[0] for x in BATTERS])))
 
-    ### create an empty AB_table
-    AB_table = {y : {x : -1 for x in unique_batter_list} for y in unique_pitcher_list}
+    ### statistics array
+    statistics = ['AB', 'H', 'HR', 'BB', 'AVG', "OBP"]
 
-    ###
+    ### create an empty stat table
+    stat_table = {z : {y : {x : -1 for x in statistics} for y in unique_batter_list} for z in unique_pitcher_list}
+
+    ### fill out the stat table - compute the statistics
     for year in range(start_year, end_year+1):
         with open(dataPath+"TEAM"+str(year), 'r') as f1:
             teams = list(csv.reader(f1))
