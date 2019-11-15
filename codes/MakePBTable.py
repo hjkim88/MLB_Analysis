@@ -7,13 +7,14 @@
 #                The rows are pitchers and the columns are hitters
 #                With given year, only collect data since that year
 #
-#                There should be 6 tables:
+#                There should be 7 tables:
 #                1. AB: At-Bat
 #                2. H: Hit
 #                3. HR: Home Run
-#                3. BB: Walk
-#                4. AVG: Batting Average
-#                5. OBP: On Base Percentage
+#                4. K: Strike Out
+#                5. BB: Walk
+#                6. AVG: Batting Average
+#                7. OBP: On Base Percentage
 #
 #   Instruction
 #               1. import MakePBTable.py
@@ -82,10 +83,16 @@ def make_stat_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
     unique_batter_list = list(sorted(set([x[0] for x in BATTERS])))
 
     ### statistics array
-    statistics = ['AB', 'H', 'HR', 'BB', 'AVG', "OBP"]
+    statistics = ['AB', 'H', 'HR', 'K', 'BB', 'AVG', "OBP"]
 
     ### create an empty stat table
-    stat_table = {z : {y : {x : -1 for x in statistics} for y in unique_batter_list} for z in unique_pitcher_list}
+    stat_table = {z : {y : {x : 0 for x in statistics} for y in unique_batter_list} for z in unique_pitcher_list}
+
+    ### set AVG and OBP as -1 (because 0 does not mean NA)
+    for pitcher in stat_table.keys():
+        for batter in stat_table[pitcher].keys():
+            stat_table[pitcher][batter]['AVG'] = -1
+            stat_table[pitcher][batter]['OBP'] = -1
 
     ### fill out the stat table - compute the statistics
     for year in range(start_year, end_year+1):
@@ -94,8 +101,17 @@ def make_stat_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
         for team in teams:
             with open(dataPath+str(year)+team[0]+".EV"+team[1], 'r') as f2:
                 events = list(csv.reader(f2))
-
-
+            pitcher = ["", ""]
+            for i in range(len(events)):
+                if (events[i][0] == 'start' or events[i][0] == 'sub') and events[i][5] == '1':
+                    pitcher[int(events[i][3])] = events[i][1]
+                elif events[i][0] == 'play':
+                    stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AB'] += 1
+                    result = events[i][6][0]
+                    if result == 'S' or result == 'D' or result == 'T' or result == 'HR':
+                        stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['H'] += 1
+                        stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AVG'] = stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['H'] / stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AB']
+                        
 
 
 
