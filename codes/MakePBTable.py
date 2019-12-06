@@ -7,14 +7,16 @@
 #                The rows are pitchers and the columns are hitters
 #                With given year, only collect data since that year
 #
-#                There should be 7 tables:
+#                There should be 9 tables:
 #                1. AB: At-Bat
 #                2. H: Hit
 #                3. HR: Home Run
-#                4. K: Strike Out
-#                5. BB: Walk
-#                6. AVG: Batting Average
-#                7. OBP: On Base Percentage
+#                4. SF: Sacrifice Fly
+#                5. K: Strike Out
+#                6. BB: Walk
+#                7. HP: Hit by Pitch
+#                8. AVG: Batting Average
+#                9. OBP: On Base Percentage
 #
 #   Instruction
 #               1. import MakePBTable.py
@@ -37,6 +39,9 @@ def start():
     ALL_PLAYERS = load_all_players("F:/Documents/PycharmProjects/MLB_Analysis/data/regular/", 1990, 2018)
     PITCHERS = get_pitchers_only(ALL_PLAYERS)
     BATTERS = get_batters_only(ALL_PLAYERS)
+    ST = make_stat_table(PITCHERS, BATTERS, "E:/HJ_Personal/Python/MLB_Analysis/data/regular/", 1990, 2018)
+    ST = make_stat_table(PITCHERS, BATTERS, "F:/Documents/PycharmProjects/MLB_Analysis/data/regular/", 1990, 2018)
+    ### save the ST
     print("Execution Time: ", timeit.default_timer() - start_time)
 
 
@@ -83,7 +88,7 @@ def make_stat_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
     unique_batter_list = list(sorted(set([x[0] for x in BATTERS])))
 
     ### statistics array
-    statistics = ['AB', 'H', 'HR', 'K', 'BB', 'AVG', "OBP"]
+    statistics = ['AB', 'H', 'HR', 'SF', 'K', 'BB', 'HP', 'AVG', "OBP"]
 
     ### create an empty stat table
     stat_table = {z : {y : {x : 0 for x in statistics} for y in unique_batter_list} for z in unique_pitcher_list}
@@ -108,10 +113,31 @@ def make_stat_table(PITCHERS, BATTERS, dataPath, start_year, end_year):
                 elif events[i][0] == 'play':
                     stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AB'] += 1
                     result = events[i][6][0]
+                    if events[i][6][0:2] == 'HR' or events[i][6][0:2] == 'HP' or events[i][6][0:2] == 'BB':
+                        result = events[i][6][0:2]
                     if result == 'S' or result == 'D' or result == 'T' or result == 'HR':
                         stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['H'] += 1
-                        stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AVG'] = stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['H'] / stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AB']
-                        
+                        stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AVG'] = (stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['H']
+                                                                                                / stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AB'])
+                        if result == 'HR':
+                            stat_table[int(not int(events[i][2]))][events[i][3]]['HR'] += 1
+                    elif result == 'K':
+                        stat_table[int(not int(events[i][2]))][events[i][3]]['K'] += 1
+                    elif result == 'W' or result == 'I':
+                        stat_table[int(not int(events[i][2]))][events[i][3]]['BB'] += 1
+                    elif result == 'HP':
+                        stat_table[int(not int(events[i][2]))][events[i][3]]['HP'] += 1
+                    elif 'SF' in events[i][6]:
+                        stat_table[int(not int(events[i][2]))][events[i][3]]['SF'] += 1
+                    stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['OBP'] = ((stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['H']
+                                                                                           + stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['W']
+                                                                                           + stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['HP'])
+                                                                                            / (stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['AB']
+                                                                                              + stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['W']
+                                                                                              + stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['HP']
+                                                                                              + stat_table[pitcher[int(not int(events[i][2]))]][events[i][3]]['SF']))
+
+    return stat_table
 
 
-
+start()
